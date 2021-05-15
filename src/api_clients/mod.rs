@@ -1,4 +1,5 @@
 pub mod pokeapi;
+pub mod shakespeare;
 
 /// Possible errors from external API calls.
 #[derive(Debug, thiserror::Error)]
@@ -11,6 +12,4 @@ pub enum ApiError {
     Reqwest(#[from] reqwest::Error),
     #[error(transparent)]
     Url(#[from] url::ParseError),
-    #[error("Unspecified API Error")]
-    Unspecified,
 }
