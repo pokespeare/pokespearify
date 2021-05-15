@@ -26,6 +26,7 @@ impl PokeApi {
     /// Makes a call to the Pokemon Species Endpoint.
     ///
     /// The returned object only contains the fields relevant for the Shakespeareation service.
+    #[tracing::instrument(name = "Get pokemon description")]
     pub async fn get_pokemon_species_description(
         &self,
         pokemon: &str,
@@ -38,6 +39,11 @@ impl PokeApi {
         let resp = self.client.get(url).send().await?;
         resp.error_for_status_ref()?;
         Ok(resp.json().await?)
+    }
+
+    /// Get the base URL of the PokéAPI.
+    pub fn base_url(&self) -> &Url {
+        &self.base_url
     }
 }
 

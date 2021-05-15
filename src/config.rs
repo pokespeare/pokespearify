@@ -1,4 +1,5 @@
 use serde::Deserialize;
+use url::Url;
 
 #[derive(Deserialize, Clone, Debug)]
 pub struct Config {
@@ -6,6 +7,8 @@ pub struct Config {
     pub host: String,
     /// Port that our Server is listening on
     pub port: u16,
+    /// The base URL of the PokéApi
+    pub poke_api_base_url: Url,
 }
 
 impl Config {
