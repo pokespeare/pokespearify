@@ -11,7 +11,12 @@ async fn main() -> anyhow::Result<()> {
 
     let config = Config::collect().context("Failed to collect config")?;
 
-    let app = Application::new((config.host, config.port), config.poke_api_base_url).await?;
+    let app = Application::new(
+        (config.host, config.port),
+        config.poke_api_base_url,
+        config.translator_api_base_url,
+    )
+    .await?;
     tracing::info!("Service is listening under {}", app.addr());
     app.run().await?;
     Ok(())

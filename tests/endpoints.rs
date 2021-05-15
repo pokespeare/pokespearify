@@ -23,7 +23,7 @@ async fn test_pokemon() {
     }
 
     let app = TestApp::spawn().await;
-    app.with_poke_api(2).await;
+    app.with_poke_api(2).await.with_translate_api(2).await;
 
     let resp = reqwest::get(format!("http://{}/pokemon/charizard", app.inner().addr()))
         .await
@@ -37,9 +37,8 @@ async fn test_pokemon() {
         .expect("Got an invalid response");
     assert_eq!(resp.name, "charizard");
 
-    // hard code the response to the original description until the translation is implemented
-    let desc = "Spits fire that\nis hot enough to\nmelt boulders.\u{0C}Known to cause\nforest fires\nunintentionally.";
-    assert_eq!(resp.description, desc);
+    let desc = TestApp::charizard_translation_response();
+    assert_eq!(resp.description, desc.translation());
 
     let resp = reqwest::get(format!("http://{}/pokemon/pikachu", app.inner().addr()))
         .await
@@ -52,5 +51,29 @@ async fn test_pokemon() {
         .expect("Got an invalid response");
     assert_eq!(resp.name, "pikachu");
 
-    assert_eq!(resp.description, desc);
+    let desc = TestApp::charizard_translation_response();
+    assert_eq!(resp.description, desc.translation());
+}
+
+#[actix_rt::test]
+async fn test_rate_limit() {
+    let app = TestApp::spawn().await;
+    app.with_poke_api(1).await.with_translate_rate_limit().await;
+
+    let resp = reqwest::get(format!("http://{}/pokemon/charizard", app.inner().addr()))
+        .await
+        .expect("The pokemon endpoint is not working");
+    assert_eq!(resp.status(), StatusCode::TOO_MANY_REQUESTS);
+
+    let resp = resp
+        .json::<String>()
+        .await
+        .expect("Got an invalid response");
+    assert_eq!(resp, "Too many requests, try again later.");
+}
+
+#[derive(Deserialize, Debug)]
+pub struct ShakespearedDescriptionResponse {
+    name: String,
+    description: String,
 }

@@ -2,6 +2,7 @@ use reqwest::Url;
 use serde::Deserialize;
 
 use crate::api_clients::ApiError;
+use crate::config::PokeApiUrl;
 
 /// API Client for pokeapi.co
 ///
@@ -16,10 +17,10 @@ pub struct PokeApi {
 impl PokeApi {
     const SPECIES: &'static str = "api/v2/pokemon-species/";
     /// Construct a new PokeAPI client.
-    pub fn new(base_url: Url) -> Self {
+    pub fn new(base_url: PokeApiUrl) -> Self {
         PokeApi {
             client: reqwest::Client::new(),
-            base_url,
+            base_url: base_url.0,
         }
     }
 
@@ -86,6 +87,8 @@ mod test {
     use wiremock::matchers::{method, path};
     use wiremock::{Mock, MockServer, ResponseTemplate};
 
+    use crate::config::PokeApiUrl;
+
     use super::{PokeApi, PokemonSpeciesResponse};
 
     static CHARIZARD_RESPONSE: &'static [u8] = include_bytes!("../../testdata/charizard.json");
@@ -118,7 +121,7 @@ mod test {
             .await;
 
         let addr = mock_server.uri();
-        let api = PokeApi::new(addr.parse().unwrap());
+        let api = PokeApi::new(PokeApiUrl(addr.parse().unwrap()));
 
         let charizard_desc = api
             .get_pokemon_species_description("charizard/")

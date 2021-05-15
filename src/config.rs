@@ -8,7 +8,9 @@ pub struct Config {
     /// Port that our Server is listening on
     pub port: u16,
     /// The base URL of the PokéApi
-    pub poke_api_base_url: Url,
+    pub poke_api_base_url: PokeApiUrl,
+    /// The base URL of the Translator API
+    pub translator_api_base_url: TranslateApiUrl,
 }
 
 impl Config {
@@ -24,3 +26,11 @@ impl Config {
         Ok(settings.try_into()?)
     }
 }
+
+#[derive(Clone, Debug, Deserialize)]
+#[serde(transparent)]
+pub struct PokeApiUrl(pub Url);
+
+#[derive(Clone, Debug, Deserialize)]
+#[serde(transparent)]
+pub struct TranslateApiUrl(pub Url);

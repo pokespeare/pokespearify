@@ -2,6 +2,7 @@ use reqwest::{StatusCode, Url};
 use serde::{Deserialize, Serialize};
 
 use crate::api_clients::ApiError;
+use crate::config::TranslateApiUrl;
 
 /// API Client for Fun Translations' Shakespear translator.
 #[derive(Clone, Debug)]
@@ -14,10 +15,10 @@ impl TranslationApi {
     const SHAKESPEARE_TRANSLATOR: &'static str = "translate/shakespeare.json";
 
     /// Construct a new API client sending requests with the given base URL.
-    pub fn new(base_url: Url) -> Self {
+    pub fn new(base_url: TranslateApiUrl) -> Self {
         Self {
             client: reqwest::Client::new(),
-            base_url,
+            base_url: base_url.0,
         }
     }
 
@@ -83,6 +84,7 @@ mod test {
     use wiremock::{Mock, MockServer, ResponseTemplate};
 
     use crate::api_clients::ApiError;
+    use crate::config::TranslateApiUrl;
 
     use super::{TranslationApi, TranslationRequest};
 
@@ -105,7 +107,7 @@ mod test {
             .await;
 
         let addr = mock_server.uri();
-        let api = TranslationApi::new(addr.parse().unwrap());
+        let api = TranslationApi::new(TranslateApiUrl(addr.parse().unwrap()));
 
         let resp = api
             .translate(
@@ -128,7 +130,7 @@ mod test {
             .await;
 
         let addr = mock_server.uri();
-        let api = TranslationApi::new(addr.parse().unwrap());
+        let api = TranslationApi::new(TranslateApiUrl(addr.parse().unwrap()));
 
         let resp = api
             .translate(
@@ -151,7 +153,7 @@ mod test {
             .await;
 
         let addr = mock_server.uri();
-        let api = TranslationApi::new(addr.parse().unwrap());
+        let api = TranslationApi::new(TranslateApiUrl(addr.parse().unwrap()));
 
         let resp = api
             .translate(

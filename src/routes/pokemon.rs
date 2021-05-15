@@ -3,6 +3,8 @@ use rand::{thread_rng, Rng};
 use serde::Serialize;
 
 use crate::api_clients::pokeapi::PokeApi;
+use crate::api_clients::shakespeare::TranslationApi;
+use crate::api_clients::ApiError;
 
 /// Handler for the Shakespeare meets Pokémon endpoint.
 ///
@@ -24,6 +26,7 @@ use crate::api_clients::pokeapi::PokeApi;
 pub async fn pokemon(
     pokemon_name: web::Path<String>,
     poke_api: web::Data<PokeApi>,
+    translate_api: web::Data<TranslationApi>,
 ) -> Result<HttpResponse, HttpResponse> {
     let pokemon_response = poke_api
         .get_pokemon_species_description(&*pokemon_name)
@@ -41,11 +44,22 @@ pub async fn pokemon(
     let choice_idx = rng.gen_range(0..english_flavor_texts.len());
     let choice = english_flavor_texts[choice_idx];
 
-    // for the time being, no translation is implemented
+    let translation = translate_api
+        .translate(choice.flavor_text())
+        .await
+        .map_err(|e| {
+            tracing::error!("{}", e);
+            // funtranslations API has a strict RateLimit on the free tier with max 5/h
+            // provide some
+            if matches!(&e, &ApiError::RateLimit(_)) {
+                return HttpResponse::TooManyRequests().json("Too many requests, try again later.");
+            }
+            HttpResponse::InternalServerError().finish()
+        })?;
 
     Ok(HttpResponse::Ok().json(ShakespearedDescription::new(
         pokemon_name.into_inner(),
-        choice.flavor_text().into(),
+        translation,
     )))
 }
 

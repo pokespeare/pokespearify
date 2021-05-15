@@ -1,3 +1,4 @@
 host: 0.0.0.0
 port: 5000
 poke_api_base_url: https://pokeapi.co
+translator_api_base_url: https://api.funtranslations.com
