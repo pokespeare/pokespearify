@@ -27,7 +27,7 @@ impl PokeApi {
     /// Makes a call to the Pokemon Species Endpoint.
     ///
     /// The returned object only contains the fields relevant for the Shakespeareation service.
-    #[tracing::instrument(name = "Get pokemon description")]
+    #[tracing::instrument(name = "Get pokemon description", skip(self))]
     pub async fn get_pokemon_species_description(
         &self,
         pokemon: &str,

@@ -18,9 +18,10 @@ use crate::api_clients::ApiError;
 /// the rate limit, we forward the 429 status to the caller.
 #[tracing::instrument(
     name = "Return a shakespeared Pokémon description",
-    skip(poke_api),
+    skip(poke_api, translate_api),
     fields(
-        poke_api = %poke_api.base_url(),
+        poke_api_url = %poke_api.base_url(),
+        translate_api_url = %translate_api.base_url(),
     )
 )]
 pub async fn pokemon(
